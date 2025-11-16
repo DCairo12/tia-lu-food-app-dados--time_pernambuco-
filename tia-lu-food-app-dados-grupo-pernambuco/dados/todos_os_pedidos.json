@@ -1,0 +1,22 @@
+[
+  {
+    "id": 2,
+    "cliente": "Pedro",
+    "itens": [
+      {
+        "id": 5,
+        "nome": "Teste",
+        "quantidade": 2,
+        "preco_unitario": 20.5
+      },
+      {
+        "id": 6,
+        "nome": "Teste 2",
+        "quantidade": 1,
+        "preco_unitario": 70.7
+      }
+    ],
+    "total": 111.7,
+    "status": "ACEITO"
+  }
+]

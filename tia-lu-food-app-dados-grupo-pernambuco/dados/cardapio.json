@@ -1,0 +1,30 @@
+[
+  {
+    "id": 5,
+    "nome": "Teste",
+    "descrição": "Teste teste teste",
+    "preço": 20.5,
+    "estoque": 6
+  },
+  {
+    "id": 6,
+    "nome": "Teste 2",
+    "descrição": "Teste teste teste 2",
+    "preço": 70.7,
+    "estoque": 2
+  },
+  {
+    "id": 7,
+    "nome": "Teste 3",
+    "descrição": "Teste teste teste 3",
+    "preço": 5.0,
+    "estoque": 1
+  },
+  {
+    "id": 8,
+    "nome": "Teste 4",
+    "descrição": "Teste teste teste",
+    "preço": 15.78,
+    "estoque": 1
+  }
+]
