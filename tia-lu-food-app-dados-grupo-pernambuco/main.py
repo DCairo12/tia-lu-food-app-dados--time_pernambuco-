@@ -1,5 +1,6 @@
 import json
 import os
+from arvore_avl import ArvoreAVL # Importa a classe da arvore
 
 #Função de ordenação implementada QUICKSORT
 def quicksort(array):
@@ -40,6 +41,17 @@ proximo_codigo_pedido = max([pedido['id'] for pedido in todos_os_pedidos], defau
 
 fila_pedidos_aceitos = carregar_dados('dados/pedidos_aceitos.json')
 fila_pedidos_prontos = carregar_dados('dados/pedidos_prontos.json')
+
+# Inicializa as arvores para busca rapida
+arvore_cardapio = ArvoreAVL()
+arvore_pedidos = ArvoreAVL()
+
+# Carrega dados do json nas arvores
+for item in cardapio:
+    arvore_cardapio.inserir_elemento(item['id'], item)
+
+for pedido in todos_os_pedidos:
+    arvore_pedidos.inserir_elemento(pedido['id'], pedido)
 
 # ========== LOOP PRINCIPAL DO PROGRAMA ==========
 opcao_principal = None
@@ -88,6 +100,9 @@ while opcao_principal != 5:
                             'estoque': estoque
                         }
                         cardapio.append(novo_item)
+                        # Adiciona tambem na arvore
+                        arvore_cardapio.inserir_elemento(novo_item['id'], novo_item)
+                        
                         proximo_codigo_item += 1
                         
                         salvar_dados('dados/cardapio.json', cardapio)
@@ -119,11 +134,9 @@ while opcao_principal != 5:
                             print(f"Cód: {item['id']} | Nome: {item['nome']} | Estoque: {item['estoque']}")
                         try:
                             cod_atualizar = int(input("Digite o id do item para atualizar: "))
-                            item_encontrado = None
-                            for item in cardapio:
-                                if item['id'] == cod_atualizar:
-                                    item_encontrado = item
-                                    break
+                            
+                            # Busca o item usando a arvore avl
+                            item_encontrado = arvore_cardapio.buscar_elemento(cod_atualizar)
                             
                             if item_encontrado:
                                 print(f"\nAtualizando item: {item_encontrado['nome']}")
@@ -201,11 +214,9 @@ while opcao_principal != 5:
                                     
                                     try:
                                         cod_item_pedido = int(codigo_str)
-                                        item_selecionado = None
-                                        for item in cardapio:
-                                            if item['id'] == cod_item_pedido:
-                                                item_selecionado = item
-                                                break
+                                        
+                                        # Busca o item na arvore
+                                        item_selecionado = arvore_cardapio.buscar_elemento(cod_item_pedido)
                                         
                                         if item_selecionado:
                                             qtd = int(input(f"Quantidade de '{item_selecionado['nome']}': "))
@@ -245,6 +256,10 @@ while opcao_principal != 5:
                                     
                                     fila_pedidos_pendentes.append(novo_pedido)
                                     todos_os_pedidos.append(novo_pedido)
+                                    
+                                    # Indexa o novo pedido na arvore
+                                    arvore_pedidos.inserir_elemento(novo_pedido['id'], novo_pedido)
+
                                     proximo_codigo_pedido += 1
                                     
                                     salvar_dados('dados/pedidos_pendentes.json', fila_pedidos_pendentes)
@@ -310,11 +325,9 @@ while opcao_principal != 5:
                             print(f"ID: {p['id']} | Cliente: {p['cliente']} | Status: {p['status']}")
                         try:
                             pedido_id = int(input("\nDigite o ID do pedido para atualizar o status: "))
-                            pedido_encontrado = None
-                            for p in todos_os_pedidos:
-                                if p['id'] == pedido_id:
-                                    pedido_encontrado = p
-                                    break
+                            
+                            # Busca o pedido na arvore
+                            pedido_encontrado = arvore_pedidos.buscar_elemento(pedido_id)
                             
                             if not pedido_encontrado:
                                 print("Pedido não encontrado.")
@@ -368,11 +381,9 @@ while opcao_principal != 5:
                                 print(f"ID: {p['id']} | Cliente: {p['cliente']} | Status: {p['status']}")
                         try:
                             pedido_id = int(input("\nDigite o ID do pedido para cancelar: "))
-                            pedido_a_cancelar = None
-                            for p in todos_os_pedidos:
-                                if p['id'] == pedido_id:
-                                    pedido_a_cancelar = p
-                                    break
+                            
+                            # Busca o pedido na arvore para cancelar
+                            pedido_a_cancelar = arvore_pedidos.buscar_elemento(pedido_id)
                             
                             if not pedido_a_cancelar:
                                 print("Pedido não encontrado.")
