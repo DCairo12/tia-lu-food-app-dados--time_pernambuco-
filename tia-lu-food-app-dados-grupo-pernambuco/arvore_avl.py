@@ -1,4 +1,4 @@
-# --- FUNÇÕES AUXILIARES DA AVL (SEM CLASSES) ---
+# --- FUNÇÕES AUXILIARES DA AV ---
 
 def criar_no(id, dado):
     """Cria um nó representado por um dicionário."""
