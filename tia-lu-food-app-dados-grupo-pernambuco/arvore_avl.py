@@ -1,116 +1,110 @@
-class No:
-    def __init__(self, id, dado):
-        self.id = id
-        self.dado = dado
-        self.esquerda = None
-        self.direita = None
-        self.altura = 1
+# --- FUNÇÕES AUXILIARES DA AVL (SEM CLASSES) ---
 
-class ArvoreAVL:
-    def __init__(self):
-        self.raiz = None
+def criar_no(id, dado):
+    """Cria um nó representado por um dicionário."""
+    return {
+        'id': id,
+        'dado': dado,     # O objeto completo (item ou pedido)
+        'esquerda': None,
+        'direita': None,
+        'altura': 1
+    }
 
-    def get_altura(self, no):
-        if not no:
-            return 0
-        return no.altura
+def get_altura(no):
+    if not no:
+        return 0
+    return no['altura']
 
-    def get_balanceamento(self, no):
-        if not no:
-            return 0
-        return self.get_altura(no.esquerda) - self.get_altura(no.direita)
+def get_balanceamento(no):
+    if not no:
+        return 0
+    return get_altura(no['esquerda']) - get_altura(no['direita'])
 
-    def rotacionar_direita(self, y):
-        x = y.esquerda
-        T2 = x.direita
+def rotacionar_direita(y):
+    x = y['esquerda']
+    T2 = x['direita']
 
-        # Rotação
-        x.direita = y
-        y.esquerda = T2
+    # Rotação
+    x['direita'] = y
+    y['esquerda'] = T2
 
-        # Atualiza alturas
-        y.altura = 1 + max(self.get_altura(y.esquerda), self.get_altura(y.direita))
-        x.altura = 1 + max(self.get_altura(x.esquerda), self.get_altura(x.direita))
+    # Atualiza alturas
+    y['altura'] = 1 + max(get_altura(y['esquerda']), get_altura(y['direita']))
+    x['altura'] = 1 + max(get_altura(x['esquerda']), get_altura(x['direita']))
 
-        return x
+    return x
 
-    def rotacionar_esquerda(self, x):
-        y = x.direita
-        T2 = y.esquerda
+def rotacionar_esquerda(x):
+    y = x['direita']
+    T2 = y['esquerda']
 
-        # Rotação
-        y.esquerda = x
-        x.direita = T2
+    # Rotação
+    y['esquerda'] = x
+    x['direita'] = T2
 
-        # Atualiza alturas
-        x.altura = 1 + max(self.get_altura(x.esquerda), self.get_altura(x.direita))
-        y.altura = 1 + max(self.get_altura(y.esquerda), self.get_altura(y.direita))
+    # Atualiza alturas
+    x['altura'] = 1 + max(get_altura(x['esquerda']), get_altura(x['direita']))
+    y['altura'] = 1 + max(get_altura(y['esquerda']), get_altura(y['direita']))
 
-        return y
+    return y
 
-    def inserir(self, no, id, dado):
-        # 1. Inserção normal de BST
-        if not no:
-            return No(id, dado)
+def inserir(no, id, dado):
+    """
+    Insere um novo elemento na árvore.
+    IMPORTANTE: Em paradigma funcional, você deve sempre capturar o retorno desta função,
+    pois ela retorna a nova raiz da subárvore modificada.
+    Uso: raiz = inserir(raiz, id, dado)
+    """
+    # 1. Inserção normal de BST
+    if not no:
+        return criar_no(id, dado)
 
-        if id < no.id:
-            no.esquerda = self.inserir(no.esquerda, id, dado)
-        elif id > no.id:
-            no.direita = self.inserir(no.direita, id, dado)
-        else:
-            # ID duplicado, atualiza o dado ou retorna
-            no.dado = dado
-            return no
-
-        # 2. Atualiza altura do ancestral
-        no.altura = 1 + max(self.get_altura(no.esquerda), self.get_altura(no.direita))
-
-        # 3. Verifica o fator de balanceamento
-        balanceamento = self.get_balanceamento(no)
-
-        # 4. Se estiver desbalanceado, aplica as rotações
-
-        # Caso Esquerda-Esquerda
-        if balanceamento > 1 and id < no.esquerda.id:
-            return self.rotacionar_direita(no)
-
-        # Caso Direita-Direita
-        if balanceamento < -1 and id > no.direita.id:
-            return self.rotacionar_esquerda(no)
-
-        # Caso Esquerda-Direita
-        if balanceamento > 1 and id > no.esquerda.id:
-            no.esquerda = self.rotacionar_esquerda(no.esquerda)
-            return self.rotacionar_direita(no)
-
-        # Caso Direita-Esquerda
-        if balanceamento < -1 and id < no.direita.id:
-            no.direita = self.rotacionar_direita(no.direita)
-            return self.rotacionar_esquerda(no)
-
+    if id < no['id']:
+        no['esquerda'] = inserir(no['esquerda'], id, dado)
+    elif id > no['id']:
+        no['direita'] = inserir(no['direita'], id, dado)
+    else:
+        # ID duplicado, atualiza o dado e retorna o próprio nó
+        no['dado'] = dado
         return no
 
-    def inserir_elemento(self, id, dado):
-        self.raiz = self.inserir(self.raiz, id, dado)
+    # 2. Atualiza altura do ancestral
+    no['altura'] = 1 + max(get_altura(no['esquerda']), get_altura(no['direita']))
 
-    def buscar(self, no, id):
-        if not no or no.id == id:
-            return no
-        
-        if id < no.id:
-            return self.buscar(no.esquerda, id)
-        
-        return self.buscar(no.direita, id)
+    # 3. Verifica o fator de balanceamento
+    balanceamento = get_balanceamento(no)
 
-    def buscar_elemento(self, id):
-        resultado = self.buscar(self.raiz, id)
-        if resultado:
-            return resultado.dado # Retorna o dicionário do dado
+    # 4. Se estiver desbalanceado, aplica as rotações
+
+    # Caso Esquerda-Esquerda
+    if balanceamento > 1 and id < no['esquerda']['id']:
+        return rotacionar_direita(no)
+
+    # Caso Direita-Direita
+    if balanceamento < -1 and id > no['direita']['id']:
+        return rotacionar_esquerda(no)
+
+    # Caso Esquerda-Direita
+    if balanceamento > 1 and id > no['esquerda']['id']:
+        no['esquerda'] = rotacionar_esquerda(no['esquerda'])
+        return rotacionar_direita(no)
+
+    # Caso Direita-Esquerda
+    if balanceamento < -1 and id < no['direita']['id']:
+        no['direita'] = rotacionar_direita(no['direita'])
+        return rotacionar_esquerda(no)
+
+    return no
+
+def buscar_elemento(no, id):
+    """Busca recursiva pelo ID. Retorna o dado (dicionário) ou None."""
+    if not no:
         return None
     
-    def em_ordem(self, no, lista_resultado):
-        # Útil para gerar relatórios ordenados ou salvar de volta no JSON
-        if no:
-            self.em_ordem(no.esquerda, lista_resultado)
-            lista_resultado.append(no.dado)
-            self.em_ordem(no.direita, lista_resultado)
+    if id == no['id']:
+        return no['dado']
+    
+    if id < no['id']:
+        return buscar_elemento(no['esquerda'], id)
+    
+    return buscar_elemento(no['direita'], id)
