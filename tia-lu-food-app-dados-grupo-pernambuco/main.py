@@ -1,5 +1,6 @@
 import json
 import os
+from arvore_avl import inserir, buscar_elemento
 
 #Função de ordenação implementada QUICKSORT
 def quicksort(array):
@@ -27,7 +28,7 @@ def salvar_dados(arquivo, dados):
     with open(arquivo, 'w', encoding='utf-8') as f:
         json.dump(dados, f, ensure_ascii=False, indent=2)
 
-#Inicializa os dados dos arquivos
+#Inicializa os dados dos arquivos (Listas para o JSON)
 cardapio = carregar_dados('dados/cardapio.json')
 proximo_codigo_item = max([item['id'] for item in cardapio], default=0) + 1
 
@@ -40,6 +41,19 @@ proximo_codigo_pedido = max([pedido['id'] for pedido in todos_os_pedidos], defau
 
 fila_pedidos_aceitos = carregar_dados('dados/pedidos_aceitos.json')
 fila_pedidos_prontos = carregar_dados('dados/pedidos_prontos.json')
+
+# --- INICIALIZAÇÃO DAS ÁRVORES AVL (FUNCIONAL) ---
+# Em vez de objetos, usamos variáveis para guardar a raiz de cada árvore
+raiz_cardapio = None
+raiz_pedidos = None
+
+# Indexar dados existentes nas árvores
+# IMPORTANTE: No modo funcional, sempre atualizamos a raiz com o retorno da função inserir
+for item in cardapio:
+    raiz_cardapio = inserir(raiz_cardapio, item['id'], item)
+
+for pedido in todos_os_pedidos:
+    raiz_pedidos = inserir(raiz_pedidos, pedido['id'], pedido)
 
 # ========== LOOP PRINCIPAL DO PROGRAMA ==========
 opcao_principal = None
@@ -87,7 +101,12 @@ while opcao_principal != 5:
                             'preço': preco,
                             'estoque': estoque
                         }
+                        # Salva na lista (para o JSON)
                         cardapio.append(novo_item)
+                        
+                        # Salva na árvore (para busca rápida)
+                        raiz_cardapio = inserir(raiz_cardapio, novo_item['id'], novo_item)
+                        
                         proximo_codigo_item += 1
                         
                         salvar_dados('dados/cardapio.json', cardapio)
@@ -119,11 +138,9 @@ while opcao_principal != 5:
                             print(f"Cód: {item['id']} | Nome: {item['nome']} | Estoque: {item['estoque']}")
                         try:
                             cod_atualizar = int(input("Digite o id do item para atualizar: "))
-                            item_encontrado = None
-                            for item in cardapio:
-                                if item['id'] == cod_atualizar:
-                                    item_encontrado = item
-                                    break
+                            
+                            # Busca o item usando a função da arvore (passando a raiz)
+                            item_encontrado = buscar_elemento(raiz_cardapio, cod_atualizar)
                             
                             if item_encontrado:
                                 print(f"\nAtualizando item: {item_encontrado['nome']}")
@@ -201,11 +218,9 @@ while opcao_principal != 5:
                                     
                                     try:
                                         cod_item_pedido = int(codigo_str)
-                                        item_selecionado = None
-                                        for item in cardapio:
-                                            if item['id'] == cod_item_pedido:
-                                                item_selecionado = item
-                                                break
+                                        
+                                        # Busca item na árvore do cardápio
+                                        item_selecionado = buscar_elemento(raiz_cardapio, cod_item_pedido)
                                         
                                         if item_selecionado:
                                             qtd = int(input(f"Quantidade de '{item_selecionado['nome']}': "))
@@ -243,8 +258,13 @@ while opcao_principal != 5:
                                         'status': 'AGUARDANDO APROVACAO'
                                     }
                                     
+                                    # Salva nas listas
                                     fila_pedidos_pendentes.append(novo_pedido)
                                     todos_os_pedidos.append(novo_pedido)
+                                    
+                                    # Salva na árvore de pedidos
+                                    raiz_pedidos = inserir(raiz_pedidos, novo_pedido['id'], novo_pedido)
+
                                     proximo_codigo_pedido += 1
                                     
                                     salvar_dados('dados/pedidos_pendentes.json', fila_pedidos_pendentes)
@@ -310,11 +330,9 @@ while opcao_principal != 5:
                             print(f"ID: {p['id']} | Cliente: {p['cliente']} | Status: {p['status']}")
                         try:
                             pedido_id = int(input("\nDigite o ID do pedido para atualizar o status: "))
-                            pedido_encontrado = None
-                            for p in todos_os_pedidos:
-                                if p['id'] == pedido_id:
-                                    pedido_encontrado = p
-                                    break
+                            
+                            # Busca o pedido na árvore
+                            pedido_encontrado = buscar_elemento(raiz_pedidos, pedido_id)
                             
                             if not pedido_encontrado:
                                 print("Pedido não encontrado.")
@@ -368,11 +386,9 @@ while opcao_principal != 5:
                                 print(f"ID: {p['id']} | Cliente: {p['cliente']} | Status: {p['status']}")
                         try:
                             pedido_id = int(input("\nDigite o ID do pedido para cancelar: "))
-                            pedido_a_cancelar = None
-                            for p in todos_os_pedidos:
-                                if p['id'] == pedido_id:
-                                    pedido_a_cancelar = p
-                                    break
+                            
+                            # Busca o pedido na árvore
+                            pedido_a_cancelar = buscar_elemento(raiz_pedidos, pedido_id)
                             
                             if not pedido_a_cancelar:
                                 print("Pedido não encontrado.")
